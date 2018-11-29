@@ -54,9 +54,11 @@ class UdpSource(SourceNode):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server_address = (self.UDP_HOST, self.UDP_PORT)
         self.sock.bind(server_address)
+        print("start listening to "+server_address)
     
     def call(self, inputs=None, **kwargs):
         data, server = self.sock.recvfrom(65507)
+        print(len(data),server)
         array = np.frombuffer(data, dtype=np.dtype('uint8'))
         img = cv.imdecode(array, 1)
         return True, img
