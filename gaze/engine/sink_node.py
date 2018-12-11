@@ -2,6 +2,11 @@ import cv2 as cv
 import socket
 from threading import Thread, Lock
 from .base_node import Node
+import random
+import string
+import json
+import numpy as np
+import zmq
 
 class SinkNode(Node):
     def __init__(self, **kwargs):
@@ -22,7 +27,6 @@ class AutoVideoSink(SinkNode):
             result, buffer = cv.imencode('.jpg', inputs, encode_param)
             cv.imshow('AutoVideoSink', inputs)
         return None
-
 
 class FileSink(SinkNode):
     def __init__(self, **kwargs):
@@ -53,13 +57,12 @@ class UdpSink(SinkNode):
         self.encode_param = [int(cv.IMWRITE_JPEG_QUALITY), jpeg_quality]
         self.buffer = None
         self.lock = Lock()
-        self.UDP_HOST = ip
-        self.UDP_PORT = port
-    
+        self.address = (ip, port)
+        self.key = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+
     def call(self, inputs, **kwargs):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        address = (self.UDP_HOST, self.UDP_PORT)
-
+        
         if inputs is not None:
             self.lock.acquire()
             result, self.buffer = cv.imencode('.jpg', inputs, self.encode_param)
@@ -69,8 +72,29 @@ class UdpSink(SinkNode):
                 pass
             if len(self.buffer) > 65507:
                 print("The message is too large to be sent within a single UDP datagram. We do not handle splitting the message in multiple datagrams")
-                #sock.sendto("FAIL".encode(),address)
+                sock.sendto("FAILFAIL".encode(),address)
                 pass
-            sock.sendto(self.buffer.tobytes(), address)
+            sock.sendto(bytes(self.key, 'utf8')+self.buffer.tobytes(),  self.address)
+            print(self.address, len(self.buffer))
+            #sock.sendto(self.buffer.tobytes(),  self.address)
         return None
     
+class NetworkSink(SinkNode):
+    def __init__(self, ip="127.0.0.1", port=5001, jpeg_quality = 50):
+        super(NetworkSink, self).__init__()
+        context = zmq.Context()
+        self.sock = context.socket(zmq.PUSH)
+        self.sock.connect('tcp://'+ip+':'+str(port))
+        self.encode_param = [int(cv.IMWRITE_JPEG_QUALITY), jpeg_quality]
+        self.key = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+
+    def call(self, inputs, **kwargs):
+        if inputs is not None:
+            result, buffer = cv.imencode('.jpg', inputs, self.encode_param)
+
+            if buffer is None:
+                pass
+            self.sock.send(bytes(self.key, 'utf8')+buffer.tobytes())
+            print(len(buffer))
+            #sock.sendto(self.buffer.tobytes(),  self.address)
+        return None

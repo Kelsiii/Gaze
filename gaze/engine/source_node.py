@@ -2,6 +2,8 @@ from .base_node import Node
 import cv2 as cv
 import socket
 import numpy as np
+import zmq
+from .gaze_socket import GazeSocket
 
 
 class SourceNode(Node):
@@ -37,14 +39,22 @@ class DefaultDeviceSource(SourceNode):
         return self._cap.read()
 
 class NetworkSource(SourceNode):
-    def __init__(self, name=None):
-        super(NetworkSource, self).__init__(name=name)
-        self._cap = cv.VideoCapture(
-            'udpsrc port=5423 ! application/x-rtp, payload=96 ! rtpjitterbuffer ! rtph264depay ! avdec_h264  ! videoconvert  ! queue ! appsink sync=false ', 
-            cv.CAP_GSTREAMER)
+    def __init__(self, ip="0.0.0.0", port=5001):
+        super(NetworkSource, self).__init__(name=None)
+        context = zmq.Context()
+        self.sock = context.socket(zmq.PULL)
+        self.sock.setsockopt(zmq.CONFLATE, 1)
+        #self.sock = GazeSocket(context, zmq.PULL)
+        self.sock.bind('tcp://'+ ip +':'+ str(port))
+
 
     def call(self, inputs=None, **kwargs):
-        return self._cap.read()
+        data = self.sock.recv()
+        print(len(data))
+        print(data[0:8].decode())
+        array = np.frombuffer(data[8:], dtype=np.dtype('uint8'))
+        img = cv.imdecode(array, 1)
+        return True, img
 
 class UdpSource(SourceNode):
     def __init__(self, ip="localhost", port=5001):
@@ -52,14 +62,15 @@ class UdpSource(SourceNode):
         self.UDP_HOST = ip
         self.UDP_PORT = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_address = (self.UDP_HOST, self.UDP_PORT)
         self.sock.bind(server_address)
-        print("start listening to "+server_address)
     
     def call(self, inputs=None, **kwargs):
         data, server = self.sock.recvfrom(65507)
         print(len(data),server)
-        array = np.frombuffer(data, dtype=np.dtype('uint8'))
+        print(data[0:8].decode())
+        array = np.frombuffer(data[8:], dtype=np.dtype('uint8'))
         img = cv.imdecode(array, 1)
         return True, img
 
