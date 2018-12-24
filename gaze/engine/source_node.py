@@ -3,7 +3,6 @@ import cv2 as cv
 import socket
 import numpy as np
 import zmq
-from .gaze_socket import GazeSocket
 
 
 class SourceNode(Node):
@@ -51,8 +50,8 @@ class NetworkSource(SourceNode):
     def call(self, inputs=None, **kwargs):
         data = self.sock.recv()
         print(len(data))
-        print(data[0:8].decode())
-        array = np.frombuffer(data[8:], dtype=np.dtype('uint8'))
+        #print(data[0:8].decode())
+        array = np.frombuffer(data, dtype=np.dtype('uint8'))
         img = cv.imdecode(array, 1)
         return True, img
 

@@ -86,15 +86,14 @@ class NetworkSink(SinkNode):
         self.sock = context.socket(zmq.PUSH)
         self.sock.connect('tcp://'+ip+':'+str(port))
         self.encode_param = [int(cv.IMWRITE_JPEG_QUALITY), jpeg_quality]
-        self.key = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+        #self.key = ''.join(random.sample(string.ascii_letters + string.digits, 8))
 
     def call(self, inputs, **kwargs):
         if inputs is not None:
             result, buffer = cv.imencode('.jpg', inputs, self.encode_param)
-
             if buffer is None:
                 pass
-            self.sock.send(bytes(self.key, 'utf8')+buffer.tobytes())
+            #self.sock.send(bytes(self.key, 'utf8')+buffer.tobytes())
             print(len(buffer))
-            #sock.sendto(self.buffer.tobytes(),  self.address)
+            self.sock.send(buffer.tobytes())
         return None
