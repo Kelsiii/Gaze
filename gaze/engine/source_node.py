@@ -43,35 +43,12 @@ class NetworkSource(SourceNode):
         context = zmq.Context()
         self.sock = context.socket(zmq.PULL)
         self.sock.setsockopt(zmq.CONFLATE, 1)
-        #self.sock = GazeSocket(context, zmq.PULL)
         self.sock.bind('tcp://'+ ip +':'+ str(port))
 
 
     def call(self, inputs=None, **kwargs):
         data = self.sock.recv()
-        print(len(data))
-        #print(data[0:8].decode())
-        array = np.frombuffer(data, dtype=np.dtype('uint8'))
-        img = cv.imdecode(array, 1)
-        return True, img
-
-class UdpSource(SourceNode):
-    def __init__(self, ip="localhost", port=5001):
-        super(UdpSource, self).__init__(name=None)
-        self.UDP_HOST = ip
-        self.UDP_PORT = port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server_address = (self.UDP_HOST, self.UDP_PORT)
-        self.sock.bind(server_address)
-    
-    def call(self, inputs=None, **kwargs):
-        data, server = self.sock.recvfrom(65507)
-        print(len(data),server)
-        print(data[0:8].decode())
-        array = np.frombuffer(data[8:], dtype=np.dtype('uint8'))
-        img = cv.imdecode(array, 1)
-        return True, img
+        return True, data
 
 class FileSource(SourceNode):
     def __init__(self, location):
