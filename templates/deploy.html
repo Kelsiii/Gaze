@@ -1,0 +1,97 @@
+{% extends 'dashboard.html' %}
+
+{% block content %}
+
+<div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Deploy New Pod
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>
+            <li class="active">Deploy New Pod</li>
+          </ol>
+        </section>
+    
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-lg-6 col-md-9">
+                  <div class="box box-primary">
+                    <div class="box-header with-border">
+                      <h3 class="box-title">Pod Info</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group">
+                            <label>Image</label>
+                            <select id="ImageSelect" class="form-control">
+                            </select>
+                        </div>
+                    <div class="form-group">
+                        <label class="control-label">Source Name</label>
+                        <div>
+                          <input type="text" class="form-control" id="source" placeholder="Used to distinguish input sources, must be unique">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label">Output IP</label>
+                        <div>
+                            <input type="text" class="form-control" id="OutputIP" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                            <label class="control-label">Output Port</label>
+                            <div>
+                                <input type="text" class="form-control" id="OutputPort" placeholder="">
+                            </div>
+                        </div>
+                    <div class="form-group">
+                        <label class="control-label">Other Env Variable</label>
+                        <div>
+                          <textarea type="text" class="form-control" id="env" placeholder='E.g {"env1":"value1","env2":"value2"}'></textarea>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="box-footer">
+                      <button id="submit" class="btn btn-primary pull-right">Submit</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+    
+        </section>
+    
+        <!-- /.content -->
+      </div>
+
+    <script>
+        $(function() {
+            var select = $("#ImageSelect")
+			$.getJSON($SCRIPT_ROOT + '/_get_images', function(data) {
+                data.forEach(element => {
+                    if(element.status == "success"){
+                        select.append("<option value='"+element.image+"'>"+element.image+"</option>");
+                    }
+                })
+            })
+        })
+
+        $("#submit").click(function(){
+            $.post( $SCRIPT_ROOT+'/_add_pod',{
+                "image" : $("#ImageSelect").val(),
+                "source" : $("#source").val(),
+                "ip":$("#OutputIP").val(),
+                "port":$("#OutputPort").val(),
+                "env":$("#env").val()
+            }, function(data){
+                if(data.res == "True"){
+                    location.href = "/";
+                } else{
+                    alert(data.msg);
+                }
+            });
+        })
+    </script>
+
+{% endblock %}
