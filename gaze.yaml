@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongo
+  labels:
+    name: mongo
+    app: gazedb
+spec:
+      containers:
+      - image: mongo
+        name: mongo
+        ports:
+        - name: mongo
+          containerPort: 27017
+        volumeMounts:
+          - name: mongo-storage
+            mountPath: /data/db
+      volumes:
+          - name: mongo-storage
+            hostPath:
+              path: /data/db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    name: mongo
+    app: gazedb
+spec:
+  selector:
+    name: mongo
+  type: LoadBalancer
+  ports:
+    - name: mongo-port
+      port: 27017
+      targetPort: 27017
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: gaze-web
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gaze-web
+    spec:
+      containers:
+      - name: gaze-web
+        image: docker.io/kelsiz/gaze_web
+        ports:
+        - containerPort: 5000
+          name: flask-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gaze-web
+spec:
+  type: LoadBalancer
+  ports:
+  - name: flask-port
+    port: 5000
+    targetPort: 5000
+  selector:
+    app: gaze-web
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: info-update
+spec:
+  containers:
+  - name: bootnode
+    image: kelsiz/gaze_info_update:latest
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: gaze-server
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gaze-server
+    spec:
+      containers:
+      - name: bootnode
+        image: kelsiz/gaze_server:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: IN_IP
+          value: "0.0.0.0"
+        - name: IN_PORT
+          value: "5001"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gaze-server
+spec:
+  selector:
+    app: gaze-server
+  type: LoadBalancer
+  ports:
+  - name: service-port
+    port: 5001
+    targetPort: 5001
