@@ -1,5 +1,5 @@
 flask
-flask_uploads
+pyzmq
 pymongo
 docker
 kubernetes

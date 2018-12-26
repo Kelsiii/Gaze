@@ -32,28 +32,10 @@ class FaceRecognition(Node):
         return process_one_frame(inputs)
 
 
-class Sink(Node):
+class WinFileSink(Sink):
     def __init__(self, **kwargs):
-        super(Sink, self).__init__(**kwargs)
-
-    def call(self, inputs, **kwargs):
-        return self
-
-
-class AutoVideoSink(Sink):
-    def __init__(self, **kwargs):
-        super(AutoVideoSink, self).__init__(**kwargs)
-
-    def call(self, inputs, **kwargs):
-        if inputs is not None:
-            cv.imshow('AutoVideoSink', inputs)
-        return None
-
-
-class FileSink(Sink):
-    def __init__(self, **kwargs):
-        super(FileSink, self).__init__(**kwargs)
-        fourcc = cv.VideoWriter_fourcc(*'MPEG')
+        super(WinFileSink, self).__init__(**kwargs)
+        fourcc = cv.VideoWriter_fourcc(*'MJPG')
         self.out = cv.VideoWriter(filename='output.avi', fourcc=fourcc, fps=20.0, frameSize=(960, 720), isColor=True)
 
     def call(self, inputs, **kwargs):

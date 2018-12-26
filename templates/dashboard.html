@@ -28,6 +28,20 @@
   <!-- Google Font -->
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+  <!-- REQUIRED JS SCRIPTS -->
+
+<!-- jQuery 3 -->
+<script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- AdminLTE App -->
+<script src="../static/dist/js/adminlte.min.js"></script>
+<!-- DataTables -->
+<script src="../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
 </head>
 
 <body class="hold-transition skin-blue sidebar-mini">
@@ -37,7 +51,7 @@
   <header class="main-header">
 
     <!-- Logo -->
-    <a href="index2.html" class="logo">
+    <a href="#" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>Gaze</b></span>
       <!-- logo for regular state and mobile devices -->
@@ -59,22 +73,18 @@
             <!-- Menu Toggle Button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <!-- The user image in the navbar-->
-              <img src="../static/dist/img/wps-160x160.jpg" class="user-image" alt="User Image">
+              <img src="../static/dist/img/default-avatar.png" class="user-image" alt="User Image">
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
               <span class="hidden-xs">Admin</span>
             </a>
-            <ul class="dropdown-menu">
-			
-			
+            <ul class="dropdown-menu">			
               <!-- The user image in the menu -->
               <li class="user-header">
-                <img src="../static/dist/img/wps-160x160.jpg" class="img-circle" alt="User Image">
-
+                <img src="../static/dist/img/default-avatar.png" class="img-circle" alt="User Image">
                 <p>
                   Admin - Microsoft Software Engineer
                 </p>
               </li>
-              
               <!-- Menu Footer-->
               <li class="user-footer">
                 <div class="pull-left">
@@ -89,27 +99,22 @@
             </ul>
           </li>
 		  
-		  
           <!-- Control Sidebar Toggle Button -->
           <li>
             <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
           </li>
-		  
-		  
         </ul>
       </div>
     </nav>
   </header>
   <!-- Left side column. contains the logo and sidebar -->
   <aside class="main-sidebar">
-
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
-
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel">
         <div class="pull-left image">
-          <img src="../static/dist/img/wps-160x160.jpg" class="img-circle" alt="User Image">
+          <img src="../static/dist/img/default-avatar.png" class="img-circle" alt="User Image">
         </div>
         <div class="pull-left info">
           <p>Admin</p>
@@ -122,8 +127,20 @@
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">Main</li>
         <!-- Optionally, you can add icons to the links -->
-        <li class="active"><a href="/dashboard"><i class="fa fa-link"></i> <span>Dashboard</span></a></li>
-        <li><a href="/upload"><i class="fa fa-link"></i> <span>Upload</span></a></li>
+        <li><a href="/pods"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
+        <li><a href="/deploy"><i class="fa fa-gears"></i> <span>Scale</span></a></li>
+        <li class="treeview">
+            <a href="#">
+              <i class="fa fa-th"></i> <span>Images</span>
+              <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+            </a>
+            <ul class="treeview-menu">
+              <li><a href="/imageList"><i class="fa fa-circle-o"></i>List</a></li>
+              <li><a href="/upload"><i class="fa fa-circle-o"></i>Add Image</a></li>
+            </ul>
+        </li>
       </ul>
       <!-- /.sidebar-menu -->
     </section>
@@ -131,83 +148,14 @@
   </aside>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <h1>
-        Upload your packages
-      </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>
-        <li class="active">Dashboard</li>
-      </ol>
-    </section>
-
-    <!-- Main content -->
-    <section class="content">
-        <!-- Show accounts -->
-		 <div class="row">
-		  <div class="col-lg-10">
-			  <div class="box box-solid box-danger">
-				<div class="box-header with-border">
-				  <h3 class="box-title">All packages</h3>
-				</div>
-				<!-- /.box-header -->
-				<div class="box-body">
-				  <table id="account_table" class="table table-bordered table-striped">
-					<thead>
-					<tr>
-					  <th>User name</th>
-					  <th>Package name</th>
-					  <th>Description</th>
-					  <th>Upload time</th>
-                      <th>Operation</th>
-					</tr>
-					</thead>
-
-					<tbody>
-
-					{%for package in package_list%}
-                    <tr>
-						{%for item in package%}
-						<td>{{item}}</td>
-						{%endfor%}
-                        <td>
-                            <a href="/dashboard/deploy/{{ package[1] }}">Deploy</a>
-                            &nbsp &nbsp &nbsp
-                            <a href="/dashboard/delete/{{ package[1] }}">Delete</a>
-                        </td>
-                    </tr>
-                    {%endfor%}
-
-					</tbody>
-
-					<tfoot>
-					<tr>
-					  <th>User name</th>
-					  <th>Package name</th>
-					  <th>Description</th>
-					  <th>Upload time</th>
-                      <th>Operation</th>
-					</tr>
-					</tfoot>
-				  </table>
-				</div>
-				<!-- /.box-body -->
-			  </div>
-			  <!-- /.box -->
-		  </div>
-		 </div>
-    </section>
-
-    <!-- /.content -->
-  </div>
+  {% block content %}{% endblock %}
+  
   <!-- /.content-wrapper -->
 
   <!-- Main Footer -->
   <footer class="main-footer">
     <!-- Default to the left -->
-    <strong>Copyright &copy; 2018 <a href="#">Peisheng Wang</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; 2018 <a href="#">Azure Stack</a>.</strong> All rights reserved.
   </footer>
 
   <!-- Add the sidebar's background. This div must be placed
@@ -216,23 +164,17 @@
 </div>
 <!-- ./wrapper -->
 
-<!-- REQUIRED JS SCRIPTS -->
-
-<!-- jQuery 3 -->
-<script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
-<!-- Bootstrap 3.3.7 -->
-<script src="../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-<!-- AdminLTE App -->
-<script src="../static/dist/js/adminlte.min.js"></script>
-<!-- DataTables -->
-<script src="../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
-<script src="../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 
 <script>
 $(function () {
     $('#account_table').DataTable()
   })
 </script>
+
+<script type="text/javascript">
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
 <!-- Optionally, you can add Slimscroll and FastClick plugins.
      Both of these plugins are recommended to enhance the
      user experience. -->
