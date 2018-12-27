@@ -9,55 +9,42 @@ According to a low-definition camera, the amount of video accumulated per day is
 With this in mind, we propose Gaze to integrate the computing power of private clouds with data from IoT devices such as cameras. Provides scalable, scalable video analysis capabilities at the Edge. For developers, if there is a need for video analysis, we can convert some video streams into event streams based on our pre-built "building blocks" by simple statements, and pass them through event hub and Kafka. Downstream.
 
 # Architecture
-
-![image](https://github.com/foamliu/Gaze/raw/master/images/architecture.svg?sanitize=true)
-
-# Dataflow
-
-![image](https://github.com/foamliu/Gaze/raw/master/images/dataflow.svg?sanitize=true)
+![image](./images/arch.jpg?sanitize=true)
 
 # Quick start
-
-## Dev environment
-```bash
-$ python demo.py
-```
-
-## Docker container
-In Linux VM:
-```bash
-$ git clone https://github.com/foamliu/Gaze.git
-$ sudo docker build -t="gaze0.0.1" . 
-$ sudo docker run --name=gaze0.0.1 -p 5000:5000/udp -it -v <mount-dir>:/usr/src/gaze/output gaze0.0.1 /bin/bash
-$ python app.py
-```
-
-You can send video stream to the VM via UDP at port 5000 and then you can see output.avi in mount-dir.
-
-## K8s cluster
-In master node:
-```bash
-$ kubectl run gazepod --image=wenhuorongbing/gaze0.0.6 --port=5000
-$ kubectl expose deployment gazepod --port=5000 --target-port=5000 --protocol=UDP --type=LoadBalancer
-```
-
-Or you can use the yaml file in the source code:
+Use the yaml file in the source code:
 ```bash
 $ kubectl apply -f gaze.yaml
 ```
-
-Then get the external IP by kubectl get svc and send video stream to that IP.
-You can use kubectl exec -it <pod-name>  --/bin/bash to access the pod to see if it works.
-
-# Portal 
-
-We can easily deploy a gaze project by uploading the source code and clicking “deploy” button.
-
-![image](https://github.com/foamliu/Gaze/raw/master/images/upload.PNG)
-
-It automatically packs the gaze project to docker image and pushes the image to the docker hub.
-Finally, it generates a yaml file and deploy it on azure stack.
-
-![image](https://github.com/foamliu/Gaze/raw/master/images/homepage.PNG)
+It will deploy several services and pods in kubernetes cluster:
+![image](./images/k8s_services.jpg?sanitize=true)
+![image](./images/k8s_pods.png)
+* gaze-web : Visit its external endpoint, then you can easily manage the images and pods to process the input video streams.
+* mongo : A mongoDB is deployed in k8s, which is used to record all necessary information of images, pods, envs, etc.
+* [gaze-server](./pod_proxy.py) : Send your video stream to this external endpoint. It will identify the source of the stream and send it to the pod configured to process the stream.
+* [info-update](./pod_update.py) : This service will continuously monitor the status of the pods in the cluster and update the information in mongoDB.
 
 
+## Dev environment
+For developers, you can easily use the nodes provided in [gaze framework](https://github.com/Kelsiii/Gaze/tree/master/gaze) to create a pipeline to deal with the video streams. Also, you can use this framework to develop your own nodes and combine them into a pipeline. See the example [here](./core_pipeline.py). 
+
+## Portal 
+### Upload your image
+1. After finish the core code, build it as a docker image and push it to a registry (whether Docker Hub or Azure Container Registry).
+2. Visit portal > Images > Add Image
+3. Input the name of your image and submit.
+![image](./images/add_image.png)
+
+### Manage the scale
+1. When you have a new video input source, visit portal > Scale
+2. Choose which image you want to use to process the video stream.
+3. Input the source name, output IP and port, and other environmental variables you need to use in the container.
+![image](./images/add_pod.png)
+And you can check the pod status in portal > Dashboard
+![image](./images/pod_list.png)
+
+### Input video stream and see the output
+The [webcam.py](./example/webcam.py) and [output.py](./example/output.py) show you how to send the video stream to the service and see the output. 
+#### Dependency
+* [OpenCV-Python with GStreamer](https://docs.opencv.org/trunk/d2/de6/tutorial_py_setup_in_ubuntu.html)
+* [pyzmq](https://learning-0mq-with-pyzmq.readthedocs.io/en/latest/pyzmq/basics.html#installation)  
