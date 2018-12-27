@@ -3,7 +3,7 @@ import os
 
 class DBClient(object):
     def __init__(self):
-        MONGO_IP = os.getenv("MONGO_SERVICE_HOST") if os.getenv("MONGO_SERVICE_HOST") else "23.100.31.20" #input the mongodb endpoint here
+        MONGO_IP = os.getenv("MONGO_SERVICE_HOST") if os.getenv("MONGO_SERVICE_HOST") else "input the mongodb endpoint here"
         MONGO_PORT = os.getenv("MONGO_SERVICE_PORT") if os.getenv("MONGO_SERVICE_PORT") else 27017
         mongo_uri = "mongodb://"+MONGO_IP+":"+str(MONGO_PORT)
         
